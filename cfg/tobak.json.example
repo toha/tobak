@@ -1,0 +1,6 @@
+{
+	"mail_from": "example@example.com",
+	"mail_to": "example@example.com",
+	"tmp_log_dir": "/tmp",
+	"last_run_dir": "/var/lib/tobak"
+}

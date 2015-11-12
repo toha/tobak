@@ -1,0 +1,27 @@
+[
+	{
+		"name": "a > b Duplicity",
+		"module": "duplicity",
+		"module_cfg": {
+			"log_file": "$RUNLOGDIR/a_to_b_$SCHEDNAME_duplicity.log",
+			"include_files": [
+				"/home/xyz"
+				"/etc",
+				"/usr/local/bin",
+			],
+			"encrypt_key": "ABCDEF01",
+			"signing_key": "ABCDEF01",
+			"full_if_older_than": "60D",
+			"destination": "rsync://host//path"
+		},
+		"priority": 0,
+		"sched": [
+		    {
+		      "name": "every_2_days",
+		      "unit": "days",
+		      "value": 2
+		    }
+	  	]
+
+	}
+]
