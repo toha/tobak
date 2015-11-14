@@ -23,5 +23,29 @@
 		    }
 	  	]
 
+	},
+
+	{
+		"name": "docker test",
+		"module": "docker",
+		"module_cfg": {
+			"log_file": "$RUNLOGDIR/a_to_b_$SCHEDNAME_duplicity.log",
+			"volumes": [
+				"/var/lib/postgresql/data"
+			],
+			data_container: "postgres-data",
+			run_container: "postgres-run",
+			stop_and_restart: true,
+			"destination": "/opt/backup/docker_test"
+		},
+		"priority": 0,
+		"sched": [
+		    {
+		      "name": "every_2_days",
+		      "unit": "days",
+		      "value": 2
+		    }
+	  	]
+
 	}
 ]
