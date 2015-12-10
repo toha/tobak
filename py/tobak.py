@@ -59,6 +59,41 @@ class Tobak(object):
 		shutil.rmtree(runlogdir)
 
 
+	def __init_profile(self, profile_cfg):
+		module_class = None
+		for name, obj in inspect.getmembers(sys.modules["modules."+profile_cfg["module"]]):
+		        if inspect.isclass(obj) and name != "Module":
+		            module_class = obj
+		            break
+
+		if module_class is None:
+			handleError("error on init module. No class found!")
+
+		module_instance = module_class()
+		module_instance.init_module_specific_cfg(profile_cfg["module_cfg"])
+
+		module_instance.setName(profile_cfg["name"])
+		module_instance.setPriority(profile_cfg["priority"])
+		module_instance.setSched(profile_cfg["sched"])
+
+		self.__profiles += [module_instance]
+
+
+
+	def __processJobOutputs(self, job, retCode, output, erroutput):
+		self.__result_nums["total"] += 1
+		restxt = ""
+		if retCode == 0:
+			self.__result_nums["ok"] += 1
+			restxt += "[ok]  "
+		else:
+			self.__result_nums["nok"] += 1
+			restxt += "[nok] "
+
+
+		restxt += "%s | %s" %(job.getProfile().getName(), job.getSched()["name"])
+		self.__result_txt += [restxt]
+
 if __name__ == "__main__":
 
 	Tobak(tobak_profiles)
