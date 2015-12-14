@@ -94,6 +94,44 @@ class Tobak(object):
 		restxt += "%s | %s" %(job.getProfile().getName(), job.getSched()["name"])
 		self.__result_txt += [restxt]
 
+	def __updateLastRunFile(self, profile, sched):
+		profile_key = "%s-%s" %(profile.getName(), sched["name"])
+
+		lastrun_file = os.path.join(tobak_cfg["last_run_dir"], "lastrun.json")
+		try:
+			filehandle = file(lastrun_file)
+			lastrun = json.loads(filehandle.read())
+			filehandle.close()
+		except Exception, e:
+			lastrun = {}
+
+		lastrun[profile_key] = BACKUPSTARTTIME;
+
+		try:
+			filehandle = file(lastrun_file, "w")
+			filehandle.write(json.dumps(lastrun))
+			filehandle.close()
+		except:
+			handleError("error on writing lastrun file", e)
+
 if __name__ == "__main__":
+
+
+	if not os.path.isfile(profile_file):
+		handleError("profile file not found")
+
+	try:
+		filehandle = file(profile_file)
+		profiledata = replaceGlobalVarsInProfiles(filehandle.read())
+		filehandle.close()
+		tobak_profiles = json.loads(profiledata)
+	except Exception, e:
+		handleError("error on reading profile file", e)
+
+	try:
+		filehandle = file(passphrase_file)
+		filehandle.close()
+	except Exception, e:
+		handleError("error on reading gpg passphrase file", e)
 
 	Tobak(tobak_profiles)
