@@ -114,8 +114,46 @@ class Tobak(object):
 		except:
 			handleError("error on writing lastrun file", e)
 
+
+	def __sendResultMail(self):
+		mailtxt = u"\n".join(self.__result_txt) + "\n"
+		mailtxt += "TOTAL: %s/%s succeeded\n\n" %(self.__result_nums["ok"], self.__result_nums["total"])
+
+		allrunlogfiles = [ os.path.join(runlogdir,f) for f in os.listdir(runlogdir) if os.path.isfile(os.path.join(runlogdir,f)) ]
+		for runlogfile in allrunlogfiles:
+			try:
+				filehandle = file(runlogfile)
+				runlogdata = filehandle.read().decode('utf-8')
+				filehandle.close()
+			except Exception, e:
+				handleError("error on reading job log file", e)
+
+			mailtxt += "------------ START: %s ------------\n%s\n------------ END: %s ------------\n\n\n\n" %(runlogfile, runlogdata, runlogfile)
+
+		mailsubject = "backup report"
+		if self.__result_nums["nok"] == 0:
+			mailsubject += " (all ok)"
+		else:
+			mailsubject += " (contains errors)"
+
+		print mailtxt.encode('utf-8')
+		msg = MIMEText(mailtxt.encode('utf-8'), 'plain', 'utf-8')
+		msg["From"] = tobak_cfg["mail_from"]
+		msg["To"] = tobak_cfg["mail_to"]
+		msg["Subject"] = mailsubject
+		p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
+		p.communicate(msg.as_string())
+
+
+def replaceGlobalVarsInProfiles(profiledata):
+	profiledata = profiledata.replace("$BACKUPSTARTTIME", "%d"%BACKUPSTARTTIME)
+	profiledata = profiledata.replace("$RUNLOGDIR", runlogdir)
+	return profiledata
+
 if __name__ == "__main__":
 
+	profile_file = os.path.join(getTobakCfgDir(), "profiles.json")
+	passphrase_file = os.path.join(getTobakCfgDir(), "gpg_passphrase")
 
 	if not os.path.isfile(profile_file):
 		handleError("profile file not found")
@@ -130,6 +168,8 @@ if __name__ == "__main__":
 
 	try:
 		filehandle = file(passphrase_file)
+		gpg_passphrase = filehandle.read()
+		os.environ["PASSPHRASE"] = gpg_passphrase
 		filehandle.close()
 	except Exception, e:
 		handleError("error on reading gpg passphrase file", e)
