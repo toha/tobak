@@ -9,7 +9,7 @@ from err import handleError
 from cfg import *
 
 run_dir = os.path.split(os.path.abspath(os.path.realpath(sys.argv[0])))[0]
-# dynammicly import all modules
+# dynamic import of all modules
 module_files = os.listdir(os.path.join(run_dir, "modules"))
 module_files = filter(lambda x: x.endswith(".py") and "__init__" not in x and "module.py" not in x, module_files)
 module_names = []
